@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>College ERP Portal</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+  a:hover, a:focus {
+    text-decoration: underline;
+    outline: none;
+  }
+  button {
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Container for login & portal */
+  #app {
+    max-width: 966px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    min-height: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    padding-bottom: 1rem;
+    color: #004a99;
+    user-select: none;
+  }
+
+  /* LOGIN SCREEN */
+  #login-screen {
+    max-width: 350px;
+    margin: 4rem auto 0;
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1.5px solid #ddd;
+    background: #fafafa;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+  }
+  #login-screen h2 {
+    margin-top: 0; margin-bottom: 1rem;
+    color: #004a99;
+    text-align: center;
+    font-weight: 700;
+  }
+  #login-form {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+  input[type="text"],
+  input[type="password"],
+  select {
+    padding: 0.5rem 0.8rem;
+    margin-bottom: 1rem;
+    border: 1.8px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="password"]:focus, select:focus {
+    border-color: #0055cc;
+    outline: none;
+  }
+  button#login-button {
+    background-color: #0055cc;
+    border: none;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  button#login-button:hover {
+    background-color: #003d99;
+  }
+  .error-message {
+    margin-bottom: 1rem;
+    color: #cc0000;
+    font-weight: 700;
+    min-height: 1.2em;
+  }
+
+  /* PORTAL */
+
+  /* Top navigation (tabs) */
+  #portal {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #navbar {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 3px solid #ddd;
+    overflow-x: auto;
+  }
+
+  #navbar button {
+    flex-shrink: 0;
+    padding: 0.7rem 1.3rem;
+    background: transparent;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #444;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.3s ease, color 0.25s ease;
+    white-space: nowrap;
+  }
+  #navbar button:hover, #navbar button:focus {
+    color: #004a99;
+    outline: none;
+  }
+  #navbar button.active {
+    border-color: #004a99;
+    color: #004a99;
+  }
+
+  /* Logout button top right */
+  #logout-btn {
+    margin-left: auto;
+    background-color: #cc0000;
+    border: none;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  #logout-btn:hover, #logout-btn:focus {
+    background-color: #990000;
+    outline: none;
+  }
+
+  /* Content area for tabs */
+  #tab-content {
+    flex-grow: 1;
+    margin-top: 1rem;
+    overflow-y: auto;
+  }
+
+  /* Common styling for tab pages */
+  section.tab-page {
+    display: none;
+    animation: fadeIn 0.4s ease forwards;
+  }
+  section.tab-page.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  thead {
+    background-color: #004a99;
+    color: white;
+  }
+  th,
+  td {
+    padding: 0.65rem 0.9rem;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  /* Buttons in tables/forms */
+  .btn {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1.8px solid transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .btn-primary {
+    background-color: #0055cc;
+    color: white;
+    border-color: #0055cc;
+    cursor: pointer;
+  }
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: #003d99;
+    border-color: #003d99;
+    outline: none;
+  }
+  .btn-danger {
+    background-color: #d9534f;
+    color: white;
+    border-color: #d9534f;
+  }
+  .btn-danger:hover, .btn-danger:focus {
+    background-color: #b52b27;
+    border-color: #b52b27;
+    outline: none;
+  }
+  .btn-disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #ccc;
+  }
+
+  /* Forms */
+  form {
+    margin-top: 1rem;
+  }
+  label {
+    font-weight: 600;
+    display: block;
+    margin: 0.4rem 0 0.15rem;
+  }
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.9rem;
+    border: 1.5px solid #bbb;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus, input[type="date"]:focus, input[type="number"]:focus {
+    border-color: #0066cc;
+    outline: none;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .form-row {
+    margin-bottom: 1rem;
+  }
+
+  /* Modal Background */
+  #modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #modal-backdrop.active {
+    display: flex;
+  }
+  /* Modal window */
+  .modal {
+    background: white;
+    max-width: 500px;
+    width: 90%;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .modal-header h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #004a99;
+  }
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    font-weight: 700;
+    transition: color 0.3s ease;
+  }
+  .modal-close-btn:hover, .modal-close-btn:focus {
+    color: #004a99;
+    outline: none;
+  }
+  /* Buttons in modal footer */
+  .modal-footer {
+    margin-top: 1rem;
+    text-align: right;
+  }
+
+  /* Notification box */
+  #notification-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #004a99;
+    color: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    max-width: 300px;
+    z-index: 1100;
+    font-size: 0.95rem;
+  }
+  #notification-box.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    #app {
+      margin: 0 0.5rem;
+      padding: 1rem;
+      min-height: auto;
+    }
+    header {
+      font-size: 1.4rem;
+      padding-bottom: 0.5rem;
+    }
+    #navbar button {
+      font-size: 0.9rem;
+      padding: 0.55rem 1rem;
+    }
+    table th, table td {
+      font-size: 0.85rem;
+      padding: 0.5rem 0.7rem;
+    }
+    #logout-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app" role="main" aria-live="polite" aria-atomic="true">
+  <header>College ERP Portal</header>
+
+  <!-- LOGIN SCREEN -->
+  <section id="login-screen" aria-label="Login screen">
+    <h2>Login</h2>
+    <form id="login-form" autocomplete="off" aria-describedby="login-error" novalidate>
+      <div class="form-row">
+        <label for="username-input">Username</label>
+        <input type="text" id="username-input" name="username" required aria-required="true" autocomplete="username" />
+      </div>
+      <div class="form-row">
+        <label for="password-input">Password</label>
+        <input type="password" id="password-input" name="password" required aria-required="true" autocomplete="current-password" />
+      </div>
+      <div class="form-row">
+        <label for="role-select">Role</label>
+        <select id="role-select" name="role" required aria-required="true" aria-describedby="role-help">
+          <option value="" disabled selected>Select role</option>
+          <option value="student">Student</option>
+          <option value="faculty">Faculty</option>
+          <option value="admin">Admin</option>
+        </select>
+        <small id="role-help" style="color:#555; font-size:0.85rem;">Choose your role</small>
+      </div>
+      <div id="login-error" class="error-message" role="alert" aria-live="assertive" aria-atomic="true"></div>
+      <button type="submit" id="login-button" aria-label="Sign in to portal">Sign In</button>
+    </form>
+    <p style="margin-top: 1rem; font-size: 0.85rem; color: #555;">
+      Use demo credentials:<br />
+      <strong>Student:</strong> user: <code>student1</code>, pass: <code>student123</code><br />
+      <strong>Faculty:</strong> user: <code>faculty1</code>, pass: <code>faculty123</code><br />
+      <strong>Admin:</strong> user: <code>admin1</code>, pass: <code>admin123</code>
+    </p>
+  </section>
+
+  <!-- PORTAL -->
+  <section id="portal" hidden aria-label="ERP Portal main content" tabindex="-1">
+    <nav id="navbar" role="tablist" aria-label="ERP Navigation tabs">
+      <!-- Navigation buttons injected dynamically -->
+    </nav>
+    <button id="logout-btn" aria-label="Logout from portal">Logout</button>
+
+    <div id="tab-content" tabindex="0" aria-live="polite" aria-atomic="true" aria-relevant="additions removals">
+      <!-- Tab contents injected dynamically -->
+    </div>
+  </section>
+</div>
+
+<!-- MODAL BACKDROP -->
+<div id="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1">
+  <div class="modal" role="document" aria-labelledby="modal-title" aria-describedby="modal-desc">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close-btn" aria-label="Close modal">&times;</button>
+    </div>
+    <div id="modal-desc"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="modal-save-btn">Save</button>
+      <button class="btn btn-danger" id="modal-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION BOX -->
+<div id="notification-box" role="alert" aria-live="assertive"></div>
+
+<script>
+  (function() {
+    "use strict";
+
+    // DATA: Simulated backend data kept in localStorage
+    // Initialize default data if not present
+    const STORAGE_PREFIX = "college_erp_";
+
+    function defaultData() {
+      return {
+        users: [
+          {username: "student1", password: "student123", role: "student", name: "Alice Johnson", email: "alice@college.edu", phone: "555-2345", enrollYear: 2021, degree: "B.Sc. Computer Science"},
+          {username: "faculty1", password: "faculty123", role: "faculty", name: "Dr. Robert Smith", email: "robert.smith@college.edu", phone: "555-6789"},
+          {username: "admin1", password: "admin123", role: "admin", name: "Admin User", email: "admin@college.edu", phone: "555-0000"},
+        ],
+        courses: [
+          {id: "CS101", name: "Intro to Computer Science", instructor: "faculty1", credits: 3},
+          {id: "MATH201", name: "Calculus II", instructor: "faculty1", credits: 4},
+          {id: "ENG301", name: "English Literature", instructor: "faculty1", credits: 3},
+        ],
+        enrollments: [ // user-course selections
+          {username: "student1", courseId: "CS101"},
+          {username: "student1", courseId: "MATH201"},
+        ],
+        attendance: [
+          {username: "student1", courseId: "CS101", date: '2024-06-01', status: 'Present'},
+          {username: "student1", courseId: "MATH201", date: '2024-06-01', status: 'Absent'},
+          {username: "student1", courseId: "CS101", date: '2024-06-02', status: 'Present'},
+          {username: "student1", courseId: "MATH201", date: '2024-06-02', status: 'Present'},
+        ],
+        grades: [
+          {username: "student1", courseId: "CS101", grade: "A"},
+          {username: "student1", courseId: "MATH201", grade: "B+"},
+        ],
+        announcements: [
+          {id: 1, title: "Campus Reopening", content: "The campus will reopen fully from September 1st.", date: "2024-05-25"},
+          {id: 2, title: "Library Hours", content: "Library hours are extended during exams week.", date: "2024-05-20"},
+        ]
+      };
+    }
+
+    function loadData() {
+      let data = {};
+      const keys = ['users', 'courses', 'enrollments', 'attendance', 'grades', 'announcements'];
+      let defaulted = false;
+
+      keys.forEach(key => {
+        let val = localStorage.getItem(STORAGE_PREFIX + key);
+        if (!val) {
+          if(!defaulted) {
+            // If any data missing, initialize all default data
+            data = defaultData();
+            saveData(data);
+            defaulted = true;
+          }
+        }
+      });
+
+      if (!defaulted) {
+        // Load all
+        keys.forEach(key => {
+          data[key] = JSON.parse(localStorage.getItem(STORAGE_PREFIX + key));
+        });
+      }
+
+      return data;
+    }
+
+    function saveData(data) {
+      for (const key in data) {
+        localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(data[key]));
+      }
+    }
+
+    // SYNCHRONIZE the LocalStorage data
+    let data = loadData();
+
+    // DOM Elements
+    const loginScreen = document.getElementById('login-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+
+    const portal = document.getElementById('portal');
+    const navbar = document.getElementById('navbar');
+    const tabContent = document.getElementById('tab-content');
+    const logoutBtn = document.getElementById('logout-btn');
+    const appContainer = document.getElementById('app');
+
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const modalTitle = modalBackdrop.querySelector('#modal-title');
+    const modalDesc = modalBackdrop.querySelector('#modal-desc');
+    const modalCloseBtn = modalBackdrop.querySelector('.modal-close-btn');
+    const modalSaveBtn = document.getElementById('modal-save-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+    const notificationBox = document.getElementById('notification-box');
+
+    // APPLICATION STATE
+    let currentUser = null;
+    let currentTab = null;
+
+    // ROLE-BASED PERMISSIONS & TABS
+    const tabsByRole = {
+      student: [
+        {id: 'dashboard', label: 'Dashboard'},
+        {id: 'courses', label: 'My Courses'},
+        {id: 'attendance', label: 'Attendance'},
+        {id: 'grades', label: 'Grades'},
+        {id: 'announcements', label: 'Announcements'},
+        {id: 'profile', label: 'Profile'}
+      ],
+      faculty: [
+        {id: 'dashboard', label: 'Dashboard'},
+        {id: 'manage-courses', label: 'Manage Courses'},
+        {id: 'view-attendance', label: 'Attendance'},
+        {id: 'grade-book', label: 'Grade Book'},
+        {id: 'announcements', label: 'Announcements'},
+        {id: 'profile', label: 'Profile'}
+      ],
+      admin: [
+        {id: 'dashboard', label: 'Dashboard'},
+        {id: 'user-management', label: 'User Management'},
+        {id: 'course-management', label: 'Course Management'},
+        {id: 'announcements', label: 'Announcements'},
+        {id: 'profile', label: 'My Profile'}
+      ]
+    };
+
+    // Utility functions
+
+    function showNotification(message, duration=3000) {
+      notificationBox.textContent = message;
+      notificationBox.classList.add('show');
+      setTimeout(() => {
+        notificationBox.classList.remove('show');
+      }, duration);
+    }
+
+    // MODAL LOGIC
+
+    function openModal(title, contentHtml, saveCallback = null) {
+      modalTitle.textContent = title;
+      modalDesc.innerHTML = contentHtml;
+      modalBackdrop.classList.add('active');
+      modalBackdrop.setAttribute('aria-hidden', 'false');
+      modalSaveBtn.style.display = saveCallback ? 'inline-block' : 'none';
+      modalSaveBtn.disabled = false;
+      modalSaveBtn.onclick = () => {
+        if(saveCallback) {
+          saveCallback();
+        }
+      };
+      modalCloseBtn.focus();
+    }
+    function closeModal() {
+      modalBackdrop.classList.remove('active');
+      modalBackdrop.setAttribute('aria-hidden', 'true');
+      modalTitle.textContent = '';
+      modalDesc.innerHTML = '';
+      modalSaveBtn.onclick = null;
+      loginScreen.focus();
+    }
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalCancelBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', e => {
+      if(e.target === modalBackdrop) {
+        closeModal();
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && modalBackdrop.classList.contains('active')) {
+        e.preventDefault();
+        closeModal();
+      }
+    });
+
+    // LOGIN & AUTH
+
+    loginForm.addEventListener('submit', e => {
+      e.preventDefault();
+      loginError.textContent = '';
+      let username = loginForm.username.value.trim();
+      let password = loginForm.password.value;
+      let role = loginForm.role.value;
+
+      if(!username || !password || !role) {
+        loginError.textContent = 'Please fill all fields correctly.';
+        return;
+      }
+
+      const user = data.users.find(u => u.username === username && u.role === role);
+      if(!user || user.password !== password) {
+        loginError.textContent = 'Invalid username, password or role.';
+        return;
+      }
+
+      currentUser = user;
+      afterLogin();
+    });
+
+    // After successful login: show portal UI with role-based tabs and load data
+    function afterLogin() {
+      loginScreen.hidden = true;
+      portal.hidden = false;
+      appContainer.setAttribute('aria-live', 'off');
+      appContainer.scrollTop = 0;
+
+      buildNavBar();
+      activateTab('dashboard');
+      logoutBtn.focus();
+    }
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      currentUser = null;
+      portal.hidden = true;
+      loginScreen.hidden = false;
+      appContainer.setAttribute('aria-live', 'polite');
+      loginForm.reset();
+      loginForm.username.focus();
+      tabContent.innerHTML = '';
+      navbar.innerHTML = '';
+    });
+
+    // NAVBAR AND TAB MANAGEMENT
+
+    function buildNavBar() {
+      navbar.innerHTML = '';
+      const tabs = tabsByRole[currentUser.role];
+      tabs.forEach(tab => {
+        let btn = document.createElement('button');
+        btn.textContent = tab.label;
+        btn.id = 'tab-btn-' + tab.id;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', 'false');
+        btn.tabIndex = -1;
+        btn.dataset.tabId = tab.id;
+        btn.addEventListener('click', () => activateTab(tab.id));
+        btn.addEventListener('keydown', navKeydownHandler);
+        navbar.appendChild(btn);
+      });
+      // Add aria attributes
+      navbar.querySelectorAll('button').forEach((btn, index) => {
+        btn.setAttribute('aria-controls', 'tab-page-' + btn.dataset.tabId);
+      });
+      // Add logout button ARIA label
+      logoutBtn.setAttribute('aria-label', 'Log out');
+      if(navbar.firstChild) {
+        navbar.firstChild.tabIndex = 0;
+      }
+    }
+
+    // Keyboard navigation for tabs
+    function navKeydownHandler(e) {
+      const buttons = Array.from(navbar.children);
+      let idx = buttons.indexOf(e.target);
+      if(idx === -1) return;
+
+      switch(e.key) {
+        case 'ArrowRight':
+          e.preventDefault();
+          buttons[(idx + 1) % buttons.length].focus();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          buttons[(idx - 1 + buttons.length) % buttons.length].focus();
+          break;
+        case 'Home':
+          e.preventDefault();
+          buttons[0].focus();
+          break;
+        case 'End':
+          e.preventDefault();
+          buttons[buttons.length -1].focus();
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          activateTab(e.target.dataset.tabId);
+          break;
+        default: break;
+      }
+    }
+
+    // Activate selected tab
+    function activateTab(tabId) {
+      currentTab = tabId;
+      // Set active button in navbar
+      navbar.querySelectorAll('button').forEach(btn => {
+        let isActive = btn.dataset.tabId === tabId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.tabIndex = isActive ? 0 : -1;
+      });
+      // Show tab content
+      loadTabContent(tabId);
+    }
+
+
+    // TAB CONTENT LOADING
+    function loadTabContent(tabId) {
+      switch(tabId) {
+        case "dashboard": loadDashboard(); break;
+        case "courses": loadStudentCourses(); break;
+        case "attendance": loadStudentAttendance(); break;
+        case "grades": loadStudentGrades(); break;
+        case "announcements": loadAnnouncements(); break;
+        case "profile": loadProfile(); break;
+        case "manage-courses": loadManageCourses(); break;
+        case "view-attendance": loadFacultyAttendance(); break;
+        case "grade-book": loadGradeBook(); break;
+        case "user-management": loadUserManagement(); break;
+        case "course-management": loadCourseManagement(); break;
+        case "my-profile": loadProfile(); break;
+        default:
+          tabContent.innerHTML = "<p>Tab content not found.</p>";
+      }
+      tabContent.focus();
+    }
+
+    // UTILITIES
+
+    // Filter courses enrolled by student
+    function getStudentCourses(username) {
+      let enrolled = data.enrollments.filter(e => e.username === username).map(e => e.courseId);
+      let courses = data.courses.filter(c => enrolled.includes(c.id));
+      return courses;
+    }
+
+    // Calculate GPA for student
+    function calculateGpa(username) {
+      const grades = data.grades.filter(g => g.username === username);
+      if (grades.length === 0) return 0.00;
+
+      const gradePointsMap = {
+        "A+": 4.0,
+        "A": 4.0,
+        "A-": 3.7,
+        "B+": 3.3,
+        "B": 3.0,
+        "B-": 2.7,
+        "C+": 2.3,
+        "C": 2.0,
+        "C-": 1.7,
+        "D+": 1.3,
+        "D": 1.0,
+        "F": 0.0
+      };
+
+      let totalPoints = 0;
+      let totalCredits = 0;
+
+      grades.forEach(g => {
+        const course = data.courses.find(c => c.id === g.courseId);
+        if (!course) return;
+        const points = gradePointsMap[g.grade] || 0;
+        totalPoints += points * course.credits;
+        totalCredits += course.credits;
+      });
+
+      return (totalPoints / totalCredits).toFixed(2);
+    }
+
+    // Attendance percent for student and course
+    function calculateAttendancePercent(username, courseId) {
+      let records = data.attendance.filter(rec => rec.username === username && rec.courseId === courseId);
+      if(records.length === 0) return "N/A";
+      let presentCount = records.filter(r => r.status.toLowerCase() === 'present').length;
+      return ((presentCount / records.length) * 100).toFixed(1) + "%";
+    }
+
+    // HELPERS
+
+    // Confirm dialog helper
+    function confirmDialog(message, callback) {
+      openModal("Confirmation", `<p>${message}</p>`, () => {
+        callback(true);
+        closeModal();
+      });
+      modalCancelBtn.onclick = () => {
+        callback(false);
+        closeModal();
+      };
+    }
+
+    // SANITIZE TEXT
+    function sanitizeHtml(str) {
+      const temp = document.createElement('div');
+      temp.textContent = str;
+      return temp.innerHTML;
+    }
+
+    // --- TABS IMPLEMENTATIONS ---
+
+    // DASHBOARD TAB: Show summary per role
+    function loadDashboard() {
+      if(currentUser.role === "student") {
+        const courses = getStudentCourses(currentUser.username);
+        const gpa = calculateGpa(currentUser.username);
+        let totalCredits = courses.reduce((a,b) => a + b.credits, 0);
+        const attendancePercents = courses.map(c => {
+          return calculateAttendancePercent(currentUser.username, c.id);
+        });
+        let attendanceAvg = attendancePercents.filter(v => v !== "N/A").map(v => parseFloat(v)).reduce((a,b) => a + b, 0);
+        attendanceAvg = attendancePercents.length ? (attendanceAvg / attendancePercents.length).toFixed(1) : "N/A";
+
+        tabContent.innerHTML = `
+          <section class="tab-page active" aria-live="polite">
+            <h2>Welcome, ${sanitizeHtml(currentUser.name)}</h2>
+            <p>Your summary at a glance:</p>
+            <ul>
+              <li><strong>Enrolled Courses:</strong> ${courses.length}</li>
+              <li><strong>Total Credits:</strong> ${totalCredits}</li>
+              <li><strong>Current GPA:</strong> ${gpa}</li>
+              <li><strong>Average Attendance:</strong> ${attendanceAvg}%</li>
+            </ul>
+          </section>
+        `;
+      }
+      else if(currentUser.role === "faculty") {
+        // Faculty dashboard: show courses they instruct
+        const facultyCourses = data.courses.filter(c => c.instructor === currentUser.username);
+        tabContent.innerHTML = `
+          <section class="tab-page active" aria-live="polite">
+            <h2>Welcome, Dr. ${sanitizeHtml(currentUser.name)}</h2>
+            <p>Your courses taught:</p>
+            <ul>
+              ${facultyCourses.length > 0 ? facultyCourses.map(c => `<li><strong>${sanitizeHtml(c.name)}</strong> (${sanitizeHtml(c.id)})</li>`).join('') : '<li>No courses assigned.</li>'}
+            </ul>
+            <p>Use the tabs to manage your courses, attendance, and grades.</p>
+          </section>
+        `;
+      }
+      else if(currentUser.role === "admin") {
+        let usersCount = data.users.length;
+        let coursesCount = data.courses.length;
+        let announcementsCount = data.announcements.length;
+        tabContent.innerHTML = `
+          <section class="tab-page active" aria-live="polite">
+            <h2>Welcome Admin: ${sanitizeHtml(currentUser.name)}</h2>
+            <p>System quick stats:</p>
+            <ul>
+              <li>Total Users: ${usersCount}</li>
+              <li>Total Courses: ${coursesCount}</li>
+              <li>Announcements: ${announcementsCount}</li>
+            </ul>
+            <p>Use the tabs to manage users, courses, and announcements.</p>
+          </section>
+        `;
+      }
+    }
+
+    // STUDENT: Courses Tab
+    function loadStudentCourses() {
+      let courses = getStudentCourses(currentUser.username);
+      // Provide option to add/drop courses
+      // Show courses not enrolled for add
+
+      // Courses not enrolled
+      const notEnrolled = data.courses.filter(c => !courses.some(sc => sc.id === c.id));
+
+      const listHtml = courses.length > 0
+        ? courses.map(c => `
+          <tr>
+            <td>${sanitizeHtml(c.id)}</td>
+            <td>${sanitizeHtml(c.name)}</td>
+            <td>${sanitizeHtml(c.credits)}</td>
+            <td>${sanitizeHtml(c.instructor)}</td>
+            <td><button class="btn btn-danger" data-courseid="${sanitizeHtml(c.id)}" aria-label="Drop course ${sanitizeHtml(c.name)}">Drop</button></td>
+          </tr>
+        `).join('')
+        : `<tr><td colspan="5">You are not enrolled in any courses.</td></tr>`;
+
+      const addOptions = notEnrolled.length > 0
+        ? `<select id="add-course-select" aria-label="Select course to enroll">
+            <option value="">-- Select course --</option>
+            ${notEnrolled.map(c => `<option value="${sanitizeHtml(c.id)}">${sanitizeHtml(c.name)} (${sanitizeHtml(c.id)})</option>`).join('')}
+          </select>
+          <button id="btn-add-course" class="btn btn-primary" disabled aria-disabled="true">Enroll</button>`
+        : "<p>No available courses for enrollment.</p>";
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>My Courses</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Course ID</th><th>Name</th><th>Credits</th><th>Instructor</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="student-courses-body">${listHtml}</tbody>
+          </table>
+          <h3>Enroll in a new course</h3>
+          ${addOptions}
+        </section>
+      `;
+
+      // Add event for drop buttons
+      const dropButtons = tabContent.querySelectorAll("button.btn-danger");
+      dropButtons.forEach(btn => {
+        btn.addEventListener('click', e => {
+          const courseId = btn.getAttribute('data-courseid');
+          confirmDialog(`Are you sure you want to drop the course ${courseId}?`, confirmed => {
+            if(confirmed) {
+              dropCourse(courseId);
+            }
+          });
+        });
+      });
+
+      const addSelect = tabContent.querySelector("#add-course-select");
+      const addBtn = tabContent.querySelector("#btn-add-course");
+
+      addSelect && addSelect.addEventListener('change', e => {
+        addBtn.disabled = addSelect.value === "";
+        addBtn.setAttribute('aria-disabled', addBtn.disabled);
+      });
+      addBtn && addBtn.addEventListener('click', () => {
+        const selectedCourse = addSelect.value;
+        if(selectedCourse) {
+          enrollCourse(selectedCourse);
+        }
+      });
+    }
+
+    function dropCourse(courseId) {
+      data.enrollments = data.enrollments.filter(e => !(e.username === currentUser.username && e.courseId === courseId));
+      saveData(data);
+      showNotification(`Dropped course ${courseId}`);
+      loadStudentCourses();
+    }
+
+    function enrollCourse(courseId) {
+      // prevent duplicate enrollment
+      if(data.enrollments.some(e => e.username === currentUser.username && e.courseId === courseId)) {
+        showNotification("Already enrolled in this course");
+        return;
+      }
+      data.enrollments.push({username: currentUser.username, courseId});
+      saveData(data);
+      showNotification(`Enrolled in course ${courseId}`);
+      loadStudentCourses();
+    }
+
+    // STUDENT: Attendance Tab
+    function loadStudentAttendance() {
+      // Show attendance for enrolled courses
+      let courses = getStudentCourses(currentUser.username);
+      if(courses.length === 0) {
+        tabContent.innerHTML = `<section class="tab-page active"><h2>Attendance Record</h2><p>You are not enrolled in any courses.</p></section>`;
+        return;
+      }
+
+      // Build table
+      let attendanceTableRows = '';
+      const userAttendance = data.attendance.filter(a => a.username === currentUser.username);
+
+      // group dates and courses attendance
+      const dates = [...new Set(userAttendance.map(a => a.date))].sort((a,b) => new Date(b) - new Date(a));
+
+      if(dates.length === 0) {
+        attendanceTableRows = `<tr><td colspan="4">No attendance records found.</td></tr>`;
+      } else {
+        userAttendance.sort((a,b) => new Date(b.date) - new Date(a.date));
+        attendanceTableRows = userAttendance.map(a => {
+          const course = data.courses.find(c => c.id === a.courseId);
+          return `
+            <tr>
+              <td>${sanitizeHtml(a.date)}</td>
+              <td>${sanitizeHtml(a.courseId)}</td>
+              <td>${course ? sanitizeHtml(course.name) : 'N/A'}</td>
+              <td>${sanitizeHtml(a.status)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>Attendance Records</h2>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Course ID</th><th>Course Name</th><th>Status</th></tr>
+            </thead>
+            <tbody>${attendanceTableRows}</tbody>
+          </table>
+        </section>
+      `;
+    }
+
+    // STUDENT: Grades Tab
+    function loadStudentGrades() {
+      let grades = data.grades.filter(g => g.username === currentUser.username);
+      if(grades.length === 0) {
+        tabContent.innerHTML = `<section class="tab-page active"><h2>Grades</h2><p>No grade records available.</p></section>`;
+        return;
+      }
+      const gradesRows = grades.map(g => {
+        const course = data.courses.find(c => c.id === g.courseId);
+        return `<tr>
+                  <td>${sanitizeHtml(g.courseId)}</td>
+                  <td>${course ? sanitizeHtml(course.name) : 'N/A'}</td>
+                  <td>${sanitizeHtml(g.grade)}</td>
+                </tr>`;
+      }).join('');
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>Your Grades</h2>
+          <table>
+            <thead>
+              <tr><th>Course ID</th><th>Course Name</th><th>Grade</th></tr>
+            </thead>
+            <tbody>${gradesRows}</tbody>
+          </table>
+        </section>
+      `;
+    }
+
+    // STUDENT & FACULTY & ADMIN: Announcements Tab
+    function loadAnnouncements() {
+      if(data.announcements.length === 0) {
+        tabContent.innerHTML = `<section class="tab-page active"><h2>Announcements</h2><p>No announcements presently.</p></section>`;
+        return;
+      }
+
+      const announcementItems = data.announcements.slice().sort((a,b) => new Date(b.date) - new Date(a.date))
+        .map(ann => `
+          <article class="announcement-item" tabindex="0" style="border-bottom:1px solid #ccc;padding:0.7rem 0;">
+            <h3>${sanitizeHtml(ann.title)}</h3>
+            <p><small><em>${sanitizeHtml(new Date(ann.date).toLocaleDateString())}</em></small></p>
+            <p>${sanitizeHtml(ann.content)}</p>
+          </article>
+        `).join('');
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>Announcements</h2>
+          ${announcementItems}
+        </section>
+      `;
+
+      // Admin/Faculty can add announcements (only faculty and admin)
+      if(currentUser.role === "admin" || currentUser.role === "faculty") {
+        const addButton = document.createElement('button');
+        addButton.textContent = "Add Announcement";
+        addButton.className = "btn btn-primary";
+        addButton.style.marginTop = "1rem";
+        addButton.type = 'button';
+        addButton.addEventListener('click', () => {
+          openAnnouncementModal();
+        });
+        tabContent.querySelector('section').appendChild(addButton);
+      }
+    }
+
+    function openAnnouncementModal() {
+      const html = `
+        <form id="announcement-form" novalidate>
+          <div class="form-row">
+            <label for="ann-title">Title</label>
+            <input type="text" id="ann-title" name="title" required minlength="3" maxlength="100" />
+          </div>
+          <div class="form-row">
+            <label for="ann-content">Content</label>
+            <textarea id="ann-content" name="content" required minlength="5" rows="5"></textarea>
+          </div>
+          <div class="error-message" id="ann-error" role="alert" aria-live="assertive"></div>
+        </form>
+      `;
+
+      openModal("Add Announcement", html, () => {
+        const form = modalDesc.querySelector('#announcement-form');
+        const titleInput = form.title;
+        const contentInput = form.content;
+        const errorDiv = form.querySelector('#ann-error');
+
+        errorDiv.textContent = "";
+
+        if (!titleInput.value.trim() || titleInput.value.trim().length <3) {
+          errorDiv.textContent = "Title must be at least 3 characters.";
+          titleInput.focus();
+          return;
+        }
+        if (!contentInput.value.trim() || contentInput.value.trim().length < 5) {
+          errorDiv.textContent = "Content must be at least 5 characters.";
+          contentInput.focus();
+          return;
+        }
+
+        let newAnnouncement = {
+          id: (data.announcements.length ? data.announcements[data.announcements.length - 1].id + 1 : 1),
+          title: titleInput.value.trim(),
+          content: contentInput.value.trim(),
+          date: new Date().toISOString().split('T')[0]
+        };
+        data.announcements.push(newAnnouncement);
+        saveData(data);
+        showNotification("Announcement added successfully");
+        closeModal();
+        loadAnnouncements();
+      });
+    }
+
+    // PROFILE TAB (Common to all roles)
+    function loadProfile() {
+      let html = `
+        <section class="tab-page active" aria-live="polite">
+          <h2>Profile</h2>
+          <form id="profile-form" novalidate>
+            <div class="form-row">
+              <label for="prof-name">Name</label>
+              <input type="text" id="prof-name" name="name" required value="${sanitizeHtml(currentUser.name)}" />
+            </div>
+            <div class="form-row">
+              <label for="prof-email">Email</label>
+              <input type="email" id="prof-email" name="email" required value="${sanitizeHtml(currentUser.email)}" />
+            </div>
+            <div class="form-row">
+              <label for="prof-phone">Phone</label>
+              <input type="text" id="prof-phone" name="phone" value="${sanitizeHtml(currentUser.phone || '')}" />
+            </div>
+            ${currentUser.role === 'student' ? `
+              <div class="form-row">
+                <label>Degree Program</label>
+                <input type="text" disabled value="${sanitizeHtml(currentUser.degree || '')}" />
+              </div>
+              <div class="form-row">
+                <label>Enrollment Year</label>
+                <input type="text" disabled value="${sanitizeHtml(currentUser.enrollYear || '')}" />
+              </div>
+            ` : ''}
+            <div class="form-row" style="margin-top:1rem;">
+              <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+            </div>
+            <div id="profile-feedback" style="color:green; font-weight:600;"></div>
+          </form>
+        </section>
+      `;
+
+      tabContent.innerHTML = html;
+
+      const profileForm = document.getElementById('profile-form');
+      const feedbackDiv = document.getElementById('profile-feedback');
+      profileForm.addEventListener('submit', e => {
+        e.preventDefault();
+        feedbackDiv.textContent = "";
+
+        const name = profileForm.name.value.trim();
+        const email = profileForm.email.value.trim();
+        const phone = profileForm.phone.value.trim();
+
+        if(name.length < 3) {
+          feedbackDiv.style.color = "red";
+          feedbackDiv.textContent = "Name must be at least 3 characters.";
+          return;
+        }
+        // simple email pattern validate
+        let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailPattern.test(email)) {
+          feedbackDiv.style.color = "red";
+          feedbackDiv.textContent = "Invalid email address.";
+          return;
+        }
+
+        // Save changes to data and localStorage
+        const userIndex = data.users.findIndex(u => u.username === currentUser.username && u.role === currentUser.role);
+        if(userIndex === -1) {
+          feedbackDiv.style.color = "red";
+          feedbackDiv.textContent = "User not found.";
+          return;
+        }
+
+        data.users[userIndex].name = name;
+        data.users[userIndex].email = email;
+        data.users[userIndex].phone = phone;
+
+        saveData(data);
+
+        // Update currentUser
+        currentUser.name = name;
+        currentUser.email = email;
+        currentUser.phone = phone;
+
+        feedbackDiv.style.color = "green";
+        feedbackDiv.textContent = "Profile updated successfully!";
+      });
+    }
+
+    // FACULTY: Manage Courses Tab
+    function loadManageCourses() {
+      // Faculty sees courses they teach, can add/remove courses from their portfolio
+      // Currently only admin can add courses — faculty can only manage assigned courses for attendance and grades
+
+      let facultyCourses = data.courses.filter(c => c.instructor === currentUser.username);
+      if(facultyCourses.length === 0) {
+        tabContent.innerHTML = `<section class="tab-page active"><h2>Manage Courses</h2><p>You currently have no assigned courses.</p></section>`;
+        return;
+      }
+
+      const coursesRows = facultyCourses.map(c => `
+        <tr>
+          <td>${sanitizeHtml(c.id)}</td>
+          <td>${sanitizeHtml(c.name)}</td>
+          <td>${sanitizeHtml(c.credits)}</td>
+          <td>
+            <button class="btn btn-primary" data-cid="${sanitizeHtml(c.id)}" aria-label="Manage attendance for course ${sanitizeHtml(c.name)}">Attendance</button>
+            <button class="btn btn-primary" data-cid="${sanitizeHtml(c.id)}" aria-label="Manage grades for course ${sanitizeHtml(c.name)}">Grades</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>Manage Your Courses</h2>
+          <table>
+            <thead><tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Actions</th></tr></thead>
+            <tbody>${coursesRows}</tbody>
+          </table>
+          <p>You can manage attendance and grades for your courses using the buttons above.</p>
+        </section>
+      `;
+
+      // Add event listeners for Attendance and Grades management buttons
+      tabContent.querySelectorAll('button.btn-primary').forEach(btn => {
+        btn.onclick = () => {
+          const courseId = btn.getAttribute('data-cid');
+          if(btn.textContent.startsWith('Attendance')) {
+            openManageAttendanceModal(courseId);
+          } else if(btn.textContent.startsWith('Grades')) {
+            openManageGradesModal(courseId);
+          }
+        };
+      });
+    }
+
+    // Faculty & Admin: Manage attendance for a course modal
+    function openManageAttendanceModal(courseId) {
+      const course = data.courses.find(c => c.id === courseId);
+      if(!course) {
+        showNotification("Course not found.");
+        return;
+      }
+      // List students enrolled in this course
+      const students = data.enrollments.filter(e => e.courseId === courseId).map(e => {
+        return data.users.find(u => u.username === e.username && u.role === 'student');
+      }).filter(Boolean);
+
+      // Build form table with attendance inputs per student & date
+      let today = new Date().toISOString().split('T')[0];
+
+      const rowsHtml = students.map(s => {
+        // Get attendance record for today
+        const rec = data.attendance.find(a => a.username === s.username && a.courseId === courseId && a.date === today);
+        return `<tr>
+          <td>${sanitizeHtml(s.username)}</td>
+          <td>${sanitizeHtml(s.name)}</td>
+          <td>
+            <select data-username="${sanitizeHtml(s.username)}" aria-label="Attendance status for student ${sanitizeHtml(s.name)}">
+              <option value="Present" ${rec && rec.status==="Present" ? "selected" : ""}>Present</option>
+              <option value="Absent" ${rec && rec.status==="Absent" ? "selected" : ""}>Absent</option>
+              <option value="Excused" ${rec && rec.status==="Excused" ? "selected" : ""}>Excused</option>
+            </select>
+          </td>
+        </tr>`;
+      }).join('');
+
+      const html = `
+        <p><strong>Course:</strong> ${sanitizeHtml(course.name)} (${sanitizeHtml(course.id)})</p>
+        <p><strong>Date:</strong> ${today}</p>
+        <form id="attendance-form">
+          <table>
+            <thead>
+              <tr><th>Student ID</th><th>Name</th><th>Status</th></tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </form>
+      `;
+
+      openModal(`Manage Attendance for ${course.name}`, html, () => {
+        // Save attendance data for today
+        const selects = modalDesc.querySelectorAll('select');
+        selects.forEach(sel => {
+          const username = sel.dataset.username;
+          const status = sel.value;
+
+          // Check if exists
+          const recIndex = data.attendance.findIndex(a => a.username === username && a.courseId === courseId && a.date === today);
+          if(recIndex !== -1) {
+            data.attendance[recIndex].status = status;
+          } else {
+            data.attendance.push({ username, courseId, date: today, status });
+          }
+        });
+        saveData(data);
+        showNotification("Attendance saved.");
+        closeModal();
+        if(currentTab === 'view-attendance') loadFacultyAttendance(); // reload tab if open
+      });
+    }
+
+
+    // FACULTY: Grade Book Tab - manage grades for courses they teach, or all courses if admin
+    function loadGradeBook() {
+      // List courses for faculty
+      const facultyCourses = currentUser.role === "admin"
+        ? data.courses
+        : data.courses.filter(c => c.instructor === currentUser.username);
+
+      if(facultyCourses.length === 0) {
+        tabContent.innerHTML = `<section class="tab-page active"><h2>Grade Book</h2><p>You have no courses assigned.</p></section>`;
+        return;
+      }
+
+      const courseOptionsHtml = facultyCourses.map(c => `<option value="${sanitizeHtml(c.id)}">${sanitizeHtml(c.name)} (${sanitizeHtml(c.id)})</option>`).join('');
+
+      const html = `
+        <section class="tab-page active">
+          <h2>Grade Book</h2>
+          <label for="grade-course-select">Select course:</label>
+          <select id="grade-course-select" aria-label="Select course to view grades">
+            <option value="" selected disabled>-- Select Course --</option>
+            ${courseOptionsHtml}
+          </select>
+          <div id="grade-book-details" style="margin-top:1rem;"></div>
+        </section>
+      `;
+
+      tabContent.innerHTML = html;
+
+      const courseSelect = document.getElementById('grade-course-select');
+      const detailsDiv = document.getElementById('grade-book-details');
+
+      courseSelect.addEventListener('change', () => {
+        // Show grade form for selected course
+        const courseId = courseSelect.value;
+        if(!courseId) {
+          detailsDiv.innerHTML = '';
+          return;
+        }
+
+        const enrolledStudents = data.enrollments.filter(e => e.courseId === courseId).map(e => {
+          return data.users.find(u => u.username === e.username && u.role === 'student');
+        }).filter(Boolean);
+
+        if(enrolledStudents.length === 0) {
+          detailsDiv.innerHTML = "<p>No students enrolled in this course.</p>";
+          return;
+        }
+
+        let rowsHtml = enrolledStudents.map(s => {
+          // Get grade record if exists
+          const gradeRec = data.grades.find(g => g.username === s.username && g.courseId === courseId);
+          return `<tr>
+            <td>${sanitizeHtml(s.username)}</td>
+            <td>${sanitizeHtml(s.name)}</td>
+            <td>
+              <input type="text" maxlength="2" pattern="^[ABCDF][+-]?$" title="Valid grades: A, A-, B+, B, B-, C+, C, C-, D+, D, F" aria-label="Grade input for student ${sanitizeHtml(s.name)}" value="${gradeRec ? sanitizeHtml(gradeRec.grade) : ''}" />
+            </td>
+          </tr>`;
+        }).join('');
+
+        detailsDiv.innerHTML = `
+          <form id="grade-book-form">
+            <table>
+              <thead><tr><th>Student ID</th><th>Name</th><th>Grade</th></tr></thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+            <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Save Grades</button>
+            <div id="grade-book-feedback" style="margin-top:0.5rem; font-weight:600;"></div>
+          </form>
+        `;
+
+        // Add submit to save grades
+        const form = document.getElementById('grade-book-form');
+        const feedbackDiv = document.getElementById('grade-book-feedback');
+
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+          feedbackDiv.textContent = "";
+
+          const inputs = form.querySelectorAll('input[type=text]');
+          const validGradePattern = /^[ABCDF][+-]?$/;
+
+          for(let input of inputs) {
+            let gradeVal = input.value.trim().toUpperCase();
+            if(gradeVal !== "" && !validGradePattern.test(gradeVal)) {
+              feedbackDiv.style.color = "red";
+              feedbackDiv.textContent = `Invalid grade: ${gradeVal}. Valid grades are A, A-, B+, B, B-, C+, C, C-, D+, D, F`;
+              input.focus();
+              return;
+            }
+          }
+
+          // Save grades to data store
+          inputs.forEach(input => {
+            const gradeVal = input.value.trim().toUpperCase();
+            const username = input.closest('tr').querySelector('td').textContent;
+
+            const gradeIndex = data.grades.findIndex(g => g.username === username && g.courseId === courseId);
+
+            if(gradeVal === "") {
+              // Remove grade record if exists
+              if(gradeIndex !== -1) {
+                data.grades.splice(gradeIndex, 1);
+              }
+            } else {
+              if(gradeIndex !== -1) {
+                data.grades[gradeIndex].grade = gradeVal;
+              } else {
+                data.grades.push({username, courseId, grade: gradeVal});
+              }
+            }
+          });
+
+          saveData(data);
+          feedbackDiv.style.color = "green";
+          feedbackDiv.textContent = "Grades saved successfully.";
+          showNotification("Grades updated");
+        });
+      });
+    }
+
+    // ADMIN: User Management Tab
+    function loadUserManagement() {
+      // List users with Edit and Delete options + Add User button
+      const usersRows = data.users.map(u => `
+        <tr>
+          <td>${sanitizeHtml(u.username)}</td>
+          <td>${sanitizeHtml(u.name)}</td>
+          <td>${sanitizeHtml(u.role)}</td>
+          <td>${sanitizeHtml(u.email || '')}</td>
+          <td>${sanitizeHtml(u.phone || '')}</td>
+          <td>
+            <button class="btn btn-primary" data-username="${sanitizeHtml(u.username)}" aria-label="Edit user ${sanitizeHtml(u.username)}">Edit</button>
+            <button class="btn btn-danger" data-username="${sanitizeHtml(u.username)}" aria-label="Delete user ${sanitizeHtml(u.username)}">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>User Management</h2>
+          <button id="add-user-btn" class="btn btn-primary" aria-label="Add new user">Add User</button>
+          <table>
+            <thead>
+              <tr><th>Username</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
+            </thead>
+            <tbody>${usersRows}</tbody>
+          </table>
+        </section>
+      `;
+
+      // Add user button listener
+      tabContent.querySelector('#add-user-btn').addEventListener('click', openAddUserModal);
+
+      // Edit buttons
+      tabContent.querySelectorAll('button.btn-primary').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const username = btn.getAttribute('data-username');
+          openEditUserModal(username);
+        });
+      });
+
+      // Delete buttons
+      tabContent.querySelectorAll('button.btn-danger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const username = btn.getAttribute('data-username');
+          confirmDialog(`Are you sure you want to delete user "${username}"? This action cannot be undone.`, confirmed => {
+            if(confirmed) {
+              data.users = data.users.filter(u => u.username !== username);
+              // Remove enrollments & grades & attendance linked to user
+              data.enrollments = data.enrollments.filter(e => e.username !== username);
+              data.grades = data.grades.filter(g => g.username !== username);
+              data.attendance = data.attendance.filter(a => a.username !== username);
+              saveData(data);
+              showNotification(`User "${username}" deleted.`);
+              loadUserManagement();
+            }
+          });
+        });
+      });
+    }
+
+    // ADMIN: Add User Modal
+    function openAddUserModal() {
+      const roles = ['student', 'faculty', 'admin'];
+      const roleOptions = roles.map(r => `<option value="${r}">${r}</option>`).join('');
+      const html = `
+        <form id="user-form" novalidate>
+          <div class="form-row">
+            <label for="user-username">Username</label>
+            <input type="text" id="user-username" name="username" required minlength="3" maxlength="20" />
+          </div>
+          <div class="form-row">
+            <label for="user-password">Password</label>
+            <input type="password" id="user-password" name="password" required minlength="6" />
+          </div>
+          <div class="form-row">
+            <label for="user-name">Full Name</label>
+            <input type="text" id="user-name" name="name" required minlength="3" />
+          </div>
+          <div class="form-row">
+            <label for="user-role">Role</label>
+            <select id="user-role" name="role" required>${roleOptions}</select>
+          </div>
+          <div class="form-row">
+            <label for="user-email">Email</label>
+            <input type="email" id="user-email" name="email" />
+          </div>
+          <div class="form-row">
+            <label for="user-phone">Phone</label>
+            <input type="text" id="user-phone" name="phone" />
+          </div>
+          <div class="form-row error-message" id="user-form-error" role="alert" aria-live="assertive"></div>
+        </form>
+      `;
+      openModal("Add New User", html, () => {
+        const form = modalDesc.querySelector('#user-form');
+        const errorDiv = modalDesc.querySelector('#user-form-error');
+        errorDiv.textContent = "";
+
+        const username = form.username.value.trim();
+        const password = form.password.value;
+        const name = form.name.value.trim();
+        const role = form.role.value;
+        const email = form.email.value.trim();
+        const phone = form.phone.value.trim();
+
+        if (username.length < 3) {
+          errorDiv.textContent = "Username must be at least 3 characters.";
+          form.username.focus();
+          return;
+        }
+        if (password.length < 6) {
+          errorDiv.textContent = "Password must be at least 6 characters.";
+          form.password.focus();
+          return;
+        }
+        if (name.length < 3) {
+          errorDiv.textContent = "Name must be at least 3 characters.";
+          form.name.focus();
+          return;
+        }
+        if (!["student","faculty","admin"].includes(role)) {
+          errorDiv.textContent = "Please select a valid role.";
+          form.role.focus();
+          return;
+        }
+        // Check username duplicate
+        if(data.users.some(u => u.username === username)) {
+          errorDiv.textContent = "Username already exists.";
+          form.username.focus();
+          return;
+        }
+
+        data.users.push({username, password, name, role, email, phone});
+        saveData(data);
+        showNotification("New user added.");
+        closeModal();
+        loadUserManagement();
+      });
+    }
+
+    // ADMIN: Edit User Modal
+    function openEditUserModal(username) {
+      const user = data.users.find(u => u.username === username);
+      if(!user) {
+        showNotification("User not found.");
+        return;
+      }
+      const roles = ['student', 'faculty', 'admin'];
+      const roleOptions = roles.map(r => `<option value="${r}" ${user.role === r ? "selected":""}>${r}</option>`).join('');
+      const html = `
+        <form id="user-form" novalidate>
+          <div class="form-row">
+            <label>Username (uneditable)</label>
+            <input type="text" disabled value="${sanitizeHtml(user.username)}" />
+          </div>
+          <div class="form-row">
+            <label for="edit-password">Password (leave blank to keep current)</label>
+            <input type="password" id="edit-password" name="password" minlength="6" />
+          </div>
+          <div class="form-row">
+            <label for="edit-name">Full Name</label>
+            <input type="text" id="edit-name" name="name" required minlength="3" value="${sanitizeHtml(user.name)}" />
+          </div>
+          <div class="form-row">
+            <label for="edit-role">Role</label>
+            <select id="edit-role" name="role" required>${roleOptions}</select>
+          </div>
+          <div class="form-row">
+            <label for="edit-email">Email</label>
+            <input type="email" id="edit-email" name="email" value="${sanitizeHtml(user.email || '')}" />
+          </div>
+          <div class="form-row">
+            <label for="edit-phone">Phone</label>
+            <input type="text" id="edit-phone" name="phone" value="${sanitizeHtml(user.phone || '')}" />
+          </div>
+          <div class="form-row error-message" id="user-form-error" role="alert" aria-live="assertive"></div>
+        </form>
+      `;
+      openModal(`Edit User ${sanitizeHtml(user.username)}`, html, () => {
+        const form = modalDesc.querySelector('#user-form');
+        const errorDiv = modalDesc.querySelector('#user-form-error');
+        errorDiv.textContent = "";
+
+        const password = form.password.value;
+        const name = form.name.value.trim();
+        const role = form.role.value;
+        const email = form.email.value.trim();
+        const phone = form.phone.value.trim();
+
+        if(name.length < 3) {
+          errorDiv.textContent = "Name must be at least 3 characters.";
+          form.name.focus();
+          return;
+        }
+        if(!["student", "faculty", "admin"].includes(role)) {
+          errorDiv.textContent = "Invalid role selected.";
+          form.role.focus();
+          return;
+        }
+        if(password && password.length < 6) {
+          errorDiv.textContent = "New password must be at least 6 characters if changing.";
+          form.password.focus();
+          return;
+        }
+
+        // Update user data
+        const idx = data.users.findIndex(u => u.username === user.username);
+        if(idx === -1) {
+          errorDiv.textContent = "User not found.";
+          return;
+        }
+
+        if(password) {
+          data.users[idx].password = password;
+        }
+        data.users[idx].name = name;
+        data.users[idx].role = role;
+        data.users[idx].email = email;
+        data.users[idx].phone = phone;
+
+        saveData(data);
+        showNotification("User updated successfully.");
+        closeModal();
+        loadUserManagement();
+      });
+    }
+
+
+    // ADMIN: Course Management Tab
+    function loadCourseManagement() {
+      // Show table of courses with edit & delete + add course button
+      const coursesRows = data.courses.map(c => `
+        <tr>
+          <td>${sanitizeHtml(c.id)}</td>
+          <td>${sanitizeHtml(c.name)}</td>
+          <td>${sanitizeHtml(c.credits)}</td>
+          <td>${sanitizeHtml(c.instructor)}</td>
+          <td>
+            <button class="btn btn-primary" data-courseid="${sanitizeHtml(c.id)}" aria-label="Edit course ${sanitizeHtml(c.id)}">Edit</button>
+            <button class="btn btn-danger" data-courseid="${sanitizeHtml(c.id)}" aria-label="Delete course ${sanitizeHtml(c.id)}">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tabContent.innerHTML = `
+        <section class="tab-page active">
+          <h2>Course Management</h2>
+          <button id="btn-add-course" class="btn btn-primary" aria-label="Add new course">Add Course</button>
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Credits</th><th>Instructor (username)</th><th>Actions</th></tr>
+            </thead>
+            <tbody>${coursesRows}</tbody>
+          </table>
+        </section>
+      `;
+
+      tabContent.querySelector("#btn-add-course").addEventListener('click', openAddCourseModal);
+
+      tabContent.querySelectorAll('button.btn-primary').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const courseId = btn.getAttribute('data-courseid');
+          openEditCourseModal(courseId);
+        });
+      });
+
+      tabContent.querySelectorAll('button.btn-danger').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const courseId = btn.getAttribute('data-courseid');
+          confirmDialog(`Are you sure you want to delete the course "${courseId}"? This will remove enrollments and grades for the course.`, confirmed => {
+            if(confirmed) {
+              data.courses = data.courses.filter(c => c.id !== courseId);
+              data.enrollments = data.enrollments.filter(e => e.courseId !== courseId);
+              data.attendance = data.attendance.filter(a => a.courseId !== courseId);
+              data.grades = data.grades.filter(g => g.courseId !== courseId);
+              saveData(data);
+              showNotification(`Course ${courseId} deleted.`);
+              loadCourseManagement();
+            }
+          });
+        });
+      });
+    }
+
+    // ADMIN: Add Course Modal
+    function openAddCourseModal() {
+      const instructors = data.users.filter(u => u.role === 'faculty');
+
+      let instructorOptions = instructors.length > 0
+        ? instructors.map(i => `<option value="${sanitizeHtml(i.username)}">${sanitizeHtml(i.name)} (${sanitizeHtml(i.username)})</option>`).join('')
+        : `<option disabled>No faculty found</option>`;
+
+      const html = `
+        <form id="course-form" novalidate>
+          <div class="form-row">
+            <label for="course-id">Course ID</label>
+            <input type="text" id="course-id" name="id" required minlength="3" maxlength="10" />
+          </div>
+          <div class="form-row">
+            <label for="course-name">Course Name</label>
+            <input type="text" id="course-name" name="name" required minlength="3" />
+          </div>
+          <div class="form-row">
+            <label for="course-credits">Credits</label>
+            <input type="number" id="course-credits" name="credits" required min="1" max="10" />
+          </div>
+          <div class="form-row">
+            <label for="course-instructor">Instructor</label>
+            <select id="course-instructor" name="instructor" required>
+              <option value="" disabled selected>Select Instructor</option>
+              ${instructorOptions}
+            </select>
+          </div>
+          <div class="form-row error-message" id="course-form-error" role="alert" aria-live="assertive"></div>
+        </form>
+      `;
+      openModal("Add New Course", html, () => {
+        const form = modalDesc.querySelector('#course-form');
+        const errorDiv = modalDesc.querySelector('#course-form-error');
+        errorDiv.textContent = "";
+
+        const id = form.id.value.trim();
+        const name = form.name.value.trim();
+        const credits = parseInt(form.credits.value);
+        const instructor = form.instructor.value;
+
+        if(id.length < 3) {
+          errorDiv.textContent = "Course ID must be at least 3 characters.";
+          form.id.focus();
+          return;
+        }
+        if(name.length < 3) {
+          errorDiv.textContent = "Course name must be at least 3 characters.";
+          form.name.focus();
+          return;
+        }
+        if(isNaN(credits) || credits < 1 || credits > 10) {
+          errorDiv.textContent = "Credits must be between 1 and 10.";
+          form.credits.focus();
+          return;
+        }
+        if(!instructor) {
+          errorDiv.textContent = "Please select an instructor.";
+          form.instructor.focus();
+          return;
+        }
+        if(data.courses.some(c => c.id.toLowerCase() === id.toLowerCase())) {
+          errorDiv.textContent = "Course ID already exists.";
+          form.id.focus();
+          return;
+        }
+
+        data.courses.push({id, name, credits, instructor});
+        saveData(data);
+        showNotification(`Course ${id} added.`);
+        closeModal();
+        loadCourseManagement();
+      });
+    }
+
+    // ADMIN: Edit Course Modal
+    function openEditCourseModal(courseId) {
+      const course = data.courses.find(c => c.id === courseId);
+      if(!course) {
+        showNotification("Course not found.");
+        return;
+      }
+      const instructors = data.users.filter(u => u.role === 'faculty');
+      let instructorOptions = instructors.length > 0
+        ? instructors.map(i => `<option value="${sanitizeHtml(i.username)}" ${i.username === course.instructor ? "selected" : ""}>${sanitizeHtml(i.name)} (${sanitizeHtml(i.username)})</option>`).join('')
+        : `<option disabled>No faculty found</option>`;
+
+      const html = `
+        <form id="course-form" novalidate>
+          <div class="form-row">
+            <label>Course ID (uneditable)</label>
+            <input type="text" disabled value="${sanitizeHtml(course.id)}" />
+          </div>
+          <div class="form-row">
+            <label for="course-name">Course Name</label>
+            <input type="text" id="course-name" name="name" required minlength="3" value="${sanitizeHtml(course.name)}" />
+          </div>
+          <div class="form-row">
+            <label for="course-credits">Credits</label>
+            <input type="number" id="course-credits" name="credits" required min="1" max="10" value="${sanitizeHtml(course.credits)}" />
+          </div>
+          <div class="form-row">
+            <label for="course-instructor">Instructor</label>
+            <select id="course-instructor" name="instructor" required>
+              ${instructorOptions}
+            </select>
+          </div>
+          <div class="form-row error-message" id="course-form-error" role="alert" aria-live="assertive"></div>
+        </form>
+      `;
+
+      openModal(`Edit Course ${sanitizeHtml(course.id)}`, html, () => {
+        const form = modalDesc.querySelector('#course-form');
+        const errorDiv = modalDesc.querySelector('#course-form-error');
+        errorDiv.textContent = "";
+
+        const name = form.name.value.trim();
+        const credits = parseInt(form.credits.value);
+        const instructor = form.instructor.value;
+
+        if(name.length < 3) {
+          errorDiv.textContent = "Course name must be at least 3 characters.";
+          form.name.focus();
+          return;
+        }
+        if(isNaN(credits) || credits < 1 || credits > 10) {
+          errorDiv.textContent = "Credits must be between 1 and 10.";
+          form.credits.focus();
+          return;
+        }
+        if(!instructor) {
+          errorDiv.textContent = "Please select an instructor.";
+          form.instructor.focus();
+          return;
+        }
+        const idx = data.courses.findIndex(c => c.id === course.id);
+        if(idx === -1) {
+          errorDiv.textContent = "Course not found.";
+          return;
+        }
+
+        data.courses[idx].name = name;
+        data.courses[idx].credits = credits;
+        data.courses[idx].instructor = instructor;
+
+        saveData(data);
+        showNotification("Course updated successfully.");
+        closeModal();
+        loadCourseManagement();
+      });
+    }
+
+    // FACULTY: View Attendance Tab (similar to manage course attendance modal but full list with dates)
+    function loadFacultyAttendance() {
+      const facultyCourses = data.courses.filter(c => c.instructor === currentUser.username);
+      if(facultyCourses.length === 0) {
+        tabContent.innerHTML = `<section class="tab-page active"><h2>Attendance Records</h2><p>No courses assigned.</p></section>`;
+        return;
+      }
+
+      const courseOptionsHtml = facultyCourses.map(c => `<option value="${sanitizeHtml(c.id)}">${sanitizeHtml(c.name)} (${sanitizeHtml(c.id)})</option>`).join('');
+
+      const html = `
+        <section class="tab-page active">
+          <h2>Attendance Records</h2>
+          <label for="att-course-select">Select course:</label>
+          <select id="att-course-select" aria-label="Select course to view attendance">
+            <option value="" selected disabled>-- Select Course --</option>
+            ${courseOptionsHtml}
+          </select>
+          <div id="attendance-details" style="margin-top:1rem;"></div>
+        </section>
+      `;
+
+      tabContent.innerHTML = html;
+
+      const courseSelect = document.getElementById('att-course-select');
+      const detailsDiv = document.getElementById('attendance-details');
+
+      courseSelect.addEventListener('change', () => {
+        const courseId = courseSelect.value;
+        if(!courseId) {
+          detailsDiv.innerHTML = '';
+          return;
+        }
+
+        // Get attendance entries for course grouped by date and student
+        let records = data.attendance.filter(a => a.courseId === courseId);
+        if(records.length === 0) {
+          detailsDiv.innerHTML = "<p>No attendance records found for selected course.</p>";
+          return;
+        }
+
+        records.sort((a,b) => new Date(b.date) - new Date(a.date));
+        const rowsHtml = records.map(r => {
+          const student = data.users.find(u => u.username === r.username && u.role === "student");
+          return `<tr>
+            <td>${sanitizeHtml(r.date)}</td>
+            <td>${sanitizeHtml(r.username)}</td>
+            <td>${student ? sanitizeHtml(student.name) : 'Unknown'}</td>
+            <td>${sanitizeHtml(r.status)}</td>
+          </tr>`;
+        }).join('');
+
+        detailsDiv.innerHTML = `
+          <table>
+            <thead><tr><th>Date</th><th>Student ID</th><th>Student Name</th><th>Status</th></tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>`;
+      });
+    }
+
+    // INIT
+
+    // Accessibility helper focus trap within modal could be done but omitted for brevity
+
+    // Focus username input on start
+    document.getElementById('username-input').focus();
+
+  })();
+
+</script>
+
+</body>
+</html>
+
